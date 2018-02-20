@@ -1,0 +1,3 @@
+#!/bin/bash
+DOCKER_IMAGE=nold360/kallistios-sdk
+exec docker run -it --rm -v "$PWD:/src" "$DOCKER_IMAGE" make "$@"
