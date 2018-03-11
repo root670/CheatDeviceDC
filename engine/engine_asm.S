@@ -12,7 +12,7 @@
 .align 2
 
 CodeEngineStart:
-    stc.l	sr, @-r15   ! Push sr, r0-r14 onto stack
+    stc.l   sr, @-r15   ! Push sr, r0-r14 onto stack
     mov.l	r1, @-r15
     mov.l	r2, @-r15
     mov.l	r3, @-r15
@@ -27,12 +27,12 @@ CodeEngineStart:
     mov.l	r12, @-r15
     mov.l	r13, @-r15
     mov.l	r14, @-r15
-    
+
     mov.l   CodeListStart, r0   !r0 = CodeListStart
     mov     r0, r4              !r4 = CodePointer
 
 NextCode:
-    mov.l	@r4+, r0    ! Get code from	code list and increment CodePointer.
+    mov.l	@r4+, r0            ! Get code from	code list and increment CodePointer.
     nop
     ! if(code != NULL) {
     !   goto CodeHandler;
@@ -65,8 +65,8 @@ ProcessCode:
     bt	Write16
     cmp/eq	#2, r0
     bt	Write32
-	cmp/eq	#3, r0
-	bt	WriteArray
+    cmp/eq	#3, r0
+    bt	WriteArray
     cmp/eq	#4, r0
     bt	SerialWrite
     cmp/eq	#5, r0
@@ -75,7 +75,7 @@ ProcessCode:
     bt	CodeType8
     cmp/eq	#0xD, r0
     bt	Compare
-    bra	Write32         ! 6, 9, a, c
+    bra	Write32         ! 6, 9, a
     nop
 
 /*
@@ -112,7 +112,7 @@ Write16:
  */
 Write32:
     bra	NextCode
-    mov.l	r9, @r8     ! *r8 =	r9
+    mov.l	r9, @r8         ! *r8 =	r9
 
 /*
  * 32-bit constant array write
@@ -137,7 +137,7 @@ WriteArray_Loop:
     bra	NextCode	        ! done writing array
     nop
 
-/* 
+/*
  * 32-bit constant serial write
  * 04aaaaaa
  * nnnnssss
@@ -172,16 +172,16 @@ SerialWrite_Loop:
  * Copy @n bytes from source address @s to destination address @d.
  */
 CopyBytes:
-		mov.l	@r4+, r1	! r1 = number of bytes to copy
+    mov.l	@r4+, r1	! r1 = number of bytes to copy
 
 CopyBytes_Loop:
-		dt	r1	            ! r1 -=	1
-		mov.b	@r8+, r0	! get destination address
-		mov.b	r0, @r9
-		bf/s	CopyBytes_Loop
-		add	#1, r9
-		bra	NextCode
-		nop
+    dt	r1	            ! r1 -=	1
+    mov.b	@r8+, r0	! get destination address
+    mov.b	r0, @r9
+    bf/s	CopyBytes_Loop
+    add	#1, r9
+    bra	NextCode
+    nop
 
 /*
  * Pointer write
@@ -194,34 +194,34 @@ CopyBytes_Loop:
  * w = Bit-width of @v to write (0 = 8-bit, 1 = 16-bit, 2 = 32-bit)
  */
 CodeType8:
-		mov.l	@r4+, r1	! r1 = next code line
-		mov	r8, r0
-		and	#3, r0		    ! set next code type to 0, 1, or 2
-		shlr2	r8		    ! align to 32-bit boundary
-		shll2	r8
-		mov.l	@r8, r8		! get 32-bit value at address
-		add	r1, r8		    ! r8 +=	r1
-					        ! base address + offset
-		mov	r8, r2		    ! r2 = r8
-		shlr16	r2
-		shlr8	r2
-		mov	#0xFFFFFF8C, r1
-		cmp/eq	r1, r2      ! is address in cached memory?
-		bt/s	ProcessCode	! yes, continue with pointer write
-		mov	#0xFFFFFFAC, r1
-		cmp/eq	r1, r2      ! is address in uncached memory? 
-		bt	ProcessCode	    ! yes, continue with pointer write
-		mov	#0xC, r1
-		cmp/eq	r1, r2      ! is address in MMU-controlled memory?
-		bt	ProcessCode     ! yes, continue with pointer write
-		bra	NextCode
-		nop
+    mov.l	@r4+, r1	! r1 = next code line
+    mov	r8, r0
+    and	#3, r0		    ! set next code type to 0, 1, or 2
+    shlr2	r8		    ! align to 32-bit boundary
+    shll2	r8
+    mov.l	@r8, r8		! get 32-bit value at address
+    add	r1, r8		    ! r8 +=	r1
+                        ! base address + offset
+    mov	r8, r2		    ! r2 = r8
+    shlr16	r2
+    shlr8	r2
+    mov	#0xFFFFFF8C, r1
+    cmp/eq	r1, r2      ! is address in cached memory?
+    bt/s	ProcessCode	! yes, continue with pointer write
+    mov	#0xFFFFFFAC, r1
+    cmp/eq	r1, r2      ! is address in uncached memory?
+    bt	ProcessCode	    ! yes, continue with pointer write
+    mov	#0xC, r1
+    cmp/eq	r1, r2      ! is address in MMU-controlled memory?
+    bt	ProcessCode     ! yes, continue with pointer write
+    bra	NextCode
+    nop
 
 /*
  * 16-bit multi-line conditional
  * 0Daaaaaa
  * nnttvvvv
- * Compare the value at address @a to value @v, and execute the next @n code 
+ * Compare the value at address @a to value @v, and execute the next @n code
  * lines iff the test condition @t is true.
  * 0 = Equal
  * 1 = Not Equal
@@ -230,7 +230,7 @@ CodeType8:
  * Note:
  * When the launcher processes the code list it will:
  *   1. Convert E-type codes to D-type
- *   2. Set @n to 2 for existing D-type codes 
+ *   2. Set @n to 2 for existing D-type codes
  */
 Compare:
     mov.w	@r8, r1
@@ -276,8 +276,8 @@ Compare_Gt:
     bf/s	NextCode
     add	r3, r4
 
-    /* 
-     * Not sure what the following code lines do. I don't think they're ever 
+    /*
+     * Not sure what the following code lines do. I don't think they're ever
      * executed.
      */
     add	#-4, r8
